@@ -1,18 +1,18 @@
 # AI-Powered Parametric Insurance for Gig Workers
 
-## 📌 Problem Statement
+##  Problem Statement
 
 Gig workers (Swiggy, Zomato, Amazon delivery partners) often lose income due to external disruptions like heavy rain, floods, traffic shutdowns, or pollution. Currently, there is no reliable system to compensate them automatically.
 
 This leads to **ineffecient insurence systems** and **financial instability**
 
 
-## 💡 Solution Overview
+##  Solution Overview
 
 Our team have come up with an **AI-powered parametric insurance platform** that:
 Monitors real-world conditions (weather, traffic, disruptions),Tracks worker activity and movement, Automatically triggers payments when conditions for income loss are encountered and Prevents fraudulent activities of the workers using advanced multi-layer detection mechanisms.
 
-## 🎯 Target Users
+##  Target Users
 The main target persona of this implementation includes Food delivery partners (Swiggy/Zomato),E-commerce deliveryworkers and drivers who provide on demand tarnsportation services, i.e Ride-hailing drivers (Ola/Uber/Rapido)
 
 ## ⚙️ System Workflow and core concepts
@@ -42,7 +42,7 @@ The main target persona of this implementation includes Food delivery partners (
 6.A fraud engine cross-checks GPS activity logs, claim frequency, and weather data consistency 
     
 
-## 💰 Pricing Model
+##  Pricing Model
 
 Dynamic weekly premium of the worker is based on:
 
@@ -67,18 +67,18 @@ Prices allotted based on the risk factor associated with the area
 
 
 
-# 🛡️ Adversarial Defense & Anti-Spoofing Strategy
+#  Adversarial Defense & Anti-Spoofing Strategy
 
 ## 🔍 Core Idea: Reality Consistency Engine
 
 We validate whether a user’s claim matches **real-world behavior, environmental conditions, and activity patterns**.
 
 ---
-## 📊 Spoofing Score System (Per User)
+##  Spoofing Score System (Per User)
 
 Each user is assigned a **Spoofing Score (0–100)** that represents the likelihood of fraudulent behavior.
 
-### 🎯 Score Calculation Factors:
+###  Score Calculation Factors:
 
 - Movement anomalies (teleportation, no motion)
     
@@ -94,9 +94,9 @@ Each user is assigned a **Spoofing Score (0–100)** that represents the likelih
 
 ---
 
-## 🧩 Layered Fraud Detection System
+##  Layered Fraud Detection System
 
-### 🟢 Layer 1: Movement Intelligence
+###  Layer 1: Movement Intelligence
 
 - Continuous GPS tracking
     
@@ -108,14 +108,7 @@ Detect:
 - Unrealistic teleportation (sudden jumps)
     
 
-👉 Spoofers often:
-
-- Stay static OR Jump locations instantly
-    
-
----
-
-### 🔵 Layer 2: Work Behavior Matching
+###  Layer 2: Work Behavior Matching
 
 Check:
 
@@ -125,20 +118,12 @@ Check:
     
 - Time between deliveries
     
-
-👉 Real worker:
-
-- Has consistent delivery patterns
+Real worker will always have consistent delivery patterns
+    
+Fake: -No order history during claim period
     
 
-👉 Fake:
-
-- No order history during claim period
-    
-
----
-
-### 🟣 Layer 3: Environmental Matching (VERY POWERFUL)
+###  Layer 3: Environmental Matching (VERY POWERFUL)
 
 Match user data with real-world conditions:
 
@@ -156,9 +141,7 @@ Match user data with real-world conditions:
 - But traffic API shows clear roads → suspicious
     
 
----
-
-### 🔴 Layer 4: Cross-User Correlation (Fraud Ring Detection)
+ 🔴 Layer 4: Cross-User Correlation (Fraud Ring Detection)
 
 Detect coordinated fraud:
 
@@ -171,13 +154,13 @@ Detect coordinated fraud:
 - Same inactivity pattern
     
 
-👉 This is not natural → indicates fraud ring
+ This is not natural → indicates fraud ring
 
-## 🔁 Routine Pattern Analysis (Behavioral Profiling)
+##  Routine Pattern Analysis (Behavioral Profiling)
 
 We analyze **historical user behavior over time** to detect repeated fraud patterns.
 
-### 🔍 What We Track:
+###  What We Track:
 
 - Daily working hours
     
@@ -190,9 +173,7 @@ We analyze **historical user behavior over time** to detect repeated fraud patte
 - Claim timing patterns
     
 
----
-
-## 📊 High-Signal Data Points Used
+## High-Signal Data Points Used
 
 ### 📱 Device Intelligence
 
@@ -203,14 +184,10 @@ We analyze **historical user behavior over time** to detect repeated fraud patte
 - App version
     
 
-👉 Detect:
+used to detect the same device with multiple accounts
 
-- Same device used for multiple accounts
-    
 
----
-
-### 📡 Network Data
+###  Network Data
 
 - IP address consistency
     
@@ -219,16 +196,10 @@ We analyze **historical user behavior over time** to detect repeated fraud patte
 - Latency spikes
     
 
-👉 Spoofers often use:
+probits spoofers using VPNs
 
-- VPNs
-    
-- Emulators
-    
 
----
-
-### 📳 Sensor Data (VERY STRONG SIGNAL)
+###  Sensor Data (VERY STRONG SIGNAL)
 
 Use phone sensors:
 
@@ -244,85 +215,40 @@ Use phone sensors:
 - No real sensor activity
     
 
----
-
-## 🧪 Challenge-Response Verification
-
-When a user is suspicious:
-
-Ask:  
-👉 “Move 200 meters and confirm”
-
-- Real user → can comply
-    
-- Spoofer → struggles
-    
-
----
-
-## 🚨 Escalation System
+##  Escalation System
 
 - Mild suspicion → delay payout
     
 - Medium suspicion → additional verification
     
-- High suspicion →  
-    👉 Claim flagged  
-    👉 User reported to special fraud review team
+- High suspicion →  Claim flagged and User reported to special fraud review team
     
-
----
 
 # ⚖️ UX BALANCE (Fairness First)
 
-## 🎯 Goal
+##  Goal
 
 Catch fraud **without hurting honest workers**
 
----
 
 ## 🧩 Smart Claim Handling
 
-### 🟢 Genuine Users
+### Genuine Users
 
-- Instant payout
-    
-- No friction
+- Instant payout and No friction
     
 
----
+### Suspicious Cases
 
-### 🟡 Suspicious Cases
+- Delayed payout (not rejected) and Light verification required
+  
 
-- Delayed payout (not rejected)
+### High-Risk Cases
+
+- Claim held for deeper review and reported as fraudulant activity
+
     
-- Light verification required
-    
-
----
-
-### 🔴 High-Risk Cases
-
-- Claim held for deeper review
-    
-- Reported to fraud team
-    
-
----
-
-## 💡 User-Friendly Design Principles
-
-- Do NOT accuse users directly
-    
-- Allow network failures during bad weather
-    
-- Provide clear explanation:  
-    “Your claim is under review due to inconsistent activity”
-    
-
----
-
-## 🔁 Appeal System
+##  Appeal System
 
 - Users can retry verification
     
@@ -331,8 +257,6 @@ Catch fraud **without hurting honest workers**
 - Prevent wrongful rejection
     
 
----
-
 ## 📈 Trust-Based System
 
 - Reliable users → faster approvals
@@ -340,24 +264,22 @@ Catch fraud **without hurting honest workers**
 - Suspicious history → stricter checks
     
 
----
+## API Integrations
 
-## 🔗 Integrations
-
-- Weather API (OpenWeather)
+- Weather API (OpenWeather) - for weather triggers
     
 - Maps API (Google Maps)
     
 - Payment Gateway (Razorpay – test mode)
+  
+- OpenAQ API (free) — pollution/AQI triggers
     
-
----
 
 ## 🏗️ Tech Stack
 
 ### Frontend
 
-- React.js
+- React.js + Tailwind CSS
     
 
 ### Backend
@@ -367,17 +289,16 @@ Catch fraud **without hurting honest workers**
 
 ### Database
 
-- MongoDB
+- MongoDB + Redis
     
 
 ### AI/ML
 
 - Python (Scikit-learn) or rule-based system
-    
+- Pandas + NumPy
 
----
 
-## 🚀 Key Features
+##  Key Features
 
 - Automated claim triggering
     
@@ -390,9 +311,7 @@ Catch fraud **without hurting honest workers**
 - Instant payout simulation
     
 
----
-
-## 🔮 Future Scope
+##  Future Scope
 
 - Deep learning fraud models
     
@@ -403,16 +322,5 @@ Catch fraud **without hurting honest workers**
 - Personalized insurance plans
     
 
----
-
-## 🎥 Demo
-
-[Add video link]
-
----
-
-## 💻 GitHub Repo
-
-[Add repo link]
 
 
