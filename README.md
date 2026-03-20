@@ -15,7 +15,7 @@ Monitors real-world conditions (weather, traffic, disruptions),Tracks worker act
 ##  Target Users
 The main target persona of this implementation includes Food delivery partners (Swiggy/Zomato),E-commerce deliveryworkers and drivers who provide on demand tarnsportation services, i.e Ride-hailing drivers (Ola/Uber/Rapido)
 
-## ⚙️ System Workflow and core concepts
+##  System Workflow and core concepts
 
 1. Worker subscribes to a weekly insurance plan via mobile friendly web form (insurer-facing admin + worker-facing dashboard)
     
@@ -55,7 +55,7 @@ Dynamic weekly premium of the worker is based on:
 Prices allotted based on the risk factor associated with the area
     
 
-## 🤖 AI/ML Components
+##  AI/ML Components
 
 ### Risk Assessment- Predicts probability of disruption in a location - implementation of a 7 day weather-based claim probability based on the city zone
     
@@ -69,7 +69,7 @@ Prices allotted based on the risk factor associated with the area
 
 #  Adversarial Defense & Anti-Spoofing Strategy
 
-## 🔍 Core Idea: Reality Consistency Engine
+##  Core Idea: Reality Consistency Engine
 
 We validate whether a user’s claim matches **real-world behavior, environmental conditions, and activity patterns**.
 
@@ -134,14 +134,14 @@ Match user data with real-world conditions:
 - Area accessibility (flooded roads)
     
 
-👉 Example:
+ Example:
 
 - User claims flood
     
 - But traffic API shows clear roads → suspicious
     
 
- 🔴 Layer 4: Cross-User Correlation (Fraud Ring Detection)
+Layer 4: Cross-User Correlation (Fraud Ring Detection)
 
 Detect coordinated fraud:
 
@@ -175,7 +175,7 @@ We analyze **historical user behavior over time** to detect repeated fraud patte
 
 ## High-Signal Data Points Used
 
-### 📱 Device Intelligence
+###  Device Intelligence
 
 - Device ID / fingerprint
     
@@ -210,7 +210,7 @@ Use phone sensors:
 - Step count
     
 
-👉 Fake GPS:
+ Fake GPS:
 
 - No real sensor activity
     
@@ -224,14 +224,12 @@ Use phone sensors:
 - High suspicion →  Claim flagged and User reported to special fraud review team
     
 
-# ⚖️ UX BALANCE (Fairness First)
-
 ##  Goal
 
-Catch fraud **without hurting honest workers**
+Catch fraud attempts **without hurting honest workers** (very imporatnt)
 
 
-## 🧩 Smart Claim Handling
+##  Smart Claim Handling
 
 ### Genuine Users
 
@@ -257,7 +255,7 @@ Catch fraud **without hurting honest workers**
 - Prevent wrongful rejection
     
 
-## 📈 Trust-Based System
+##  Trust-Based System
 
 - Reliable users → faster approvals
     
@@ -275,7 +273,7 @@ Catch fraud **without hurting honest workers**
 - OpenAQ API (free) — pollution/AQI triggers
     
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 
