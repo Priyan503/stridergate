@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GigShield — Parametric Income Insurance</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0e1a;
+    --surface:#111827;
+    --surface2:#1a2335;
+    --border:#1e2d45;
+    --accent:#00d4a8;
+    --accent2:#f5a623;
+    --accent3:#e05c5c;
+    --text:#e8edf5;
+    --muted:#6b7fa3;
+    --safe:#00d4a8;
+    --warn:#f5a623;
+    --danger:#e05c5c;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+  #root{min-height:100vh}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+  /* Animations */
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+  @keyframes ping{0%{transform:scale(1);opacity:1}75%,100%{transform:scale(2);opacity:0}}
+  @keyframes countUp{from{opacity:0}to{opacity:1}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+  .fade-in{animation:fadeIn 0.4s ease forwards}
+  .mono{font-family:'DM Mono',monospace}
+  .serif{font-family:'DM Serif Display',serif}
+
+  /* Nav */
+  .nav{
+    position:sticky;top:0;z-index:100;
+    background:rgba(10,14,26,0.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:0 24px;
+    height:56px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;letter-spacing:-0.3px}
+  .nav-logo-icon{
+    width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),#00a88a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+  }
+  .nav-tabs{display:flex;gap:2px}
+  .nav-tab{
+    padding:6px 14px;border-radius:6px;font-size:13px;font-weight:500;
+    cursor:pointer;border:none;background:transparent;color:var(--muted);
+    transition:all 0.2s;
+  }
+  .nav-tab:hover{color:var(--text);background:var(--surface)}
+  .nav-tab.active{color:var(--accent);background:rgba(0,212,168,0.1)}
+  .nav-badge{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--accent3);color:#fff;font-size:10px;font-weight:600;
+    margin-left:4px;
+  }
+
+  /* Layout */
+  .page{padding:32px 24px;max-width:1100px;margin:0 auto}
+  .page-header{margin-bottom:28px}
+  .page-title{font-size:26px;font-weight:600;letter-spacing:-0.5px}
+  .page-subtitle{font-size:14px;color:var(--muted);margin-top:4px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+  /* Cards */
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:20px;
+  }
+  .card-title{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+
+  /* Stat card */
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .stat-value{font-size:28px;font-weight:600;letter-spacing:-0.5px;margin:4px 0}
+  .stat-label{font-size:12px;color:var(--muted)}
+  .stat-change{font-size:12px;margin-top:4px}
+  .stat-change.up{color:var(--safe)}
+  .stat-change.down{color:var(--danger)}
+
+  /* Form */
+  .form-group{margin-bottom:16px}
+  .form-label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+  .form-input,.form-select{
+    width:100%;padding:10px 14px;
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;color:var(--text);font-size:14px;font-family:'Outfit',sans-serif;
+    outline:none;transition:border-color 0.2s;
+  }
+  .form-input:focus,.form-select:focus{border-color:var(--accent)}
+  .form-select option{background:var(--surface2)}
+
+  /* Buttons */
+  .btn{
+    padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;
+    cursor:pointer;border:none;transition:all 0.2s;font-family:'Outfit',sans-serif;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn-primary{background:var(--accent);color:#0a0e1a}
+  .btn-primary:hover{background:#00bfa0;transform:translateY(-1px)}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-danger{background:rgba(224,92,92,0.15);color:var(--danger);border:1px solid rgba(224,92,92,0.3)}
+  .btn-full{width:100%;justify-content:center}
+  .btn-sm{padding:6px 12px;font-size:13px}
+
+  /* Badge */
+  .badge{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;
+    text-transform:uppercase;letter-spacing:0.5px;
+  }
+  .badge-green{background:rgba(0,212,168,0.12);color:var(--safe)}
+  .badge-yellow{background:rgba(245,166,35,0.12);color:var(--warn)}
+  .badge-red{background:rgba(224,92,92,0.12);color:var(--danger)}
+  .badge-blue{background:rgba(96,165,250,0.12);color:#60a5fa}
+  .badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  /* Progress bar */
+  .progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:3px;transition:width 0.8s ease}
+
+  /* Table */
+  .table{width:100%;border-collapse:collapse}
+  .table th{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+  .table td{padding:12px;font-size:13px;border-bottom:1px solid rgba(30,45,69,0.5)}
+  .table tr:last-child td{border-bottom:none}
+  .table tr:hover td{background:rgba(255,255,255,0.02)}
+
+  /* Trigger card */
+  .trigger-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:16px;
+    display:flex;align-items:center;justify-content:space-between;
+    transition:all 0.3s;
+  }
+  .trigger-card.active{border-color:var(--accent3);background:rgba(224,92,92,0.05)}
+  .trigger-card.fired{border-color:var(--warn);background:rgba(245,166,35,0.05)}
+  .trigger-icon{font-size:24px;margin-right:14px}
+  .trigger-name{font-size:14px;font-weight:500}
+  .trigger-threshold{font-size:12px;color:var(--muted);margin-top:2px}
+  .trigger-value{font-family:'DM Mono',monospace;font-size:18px;font-weight:500}
+
+  /* BCS meter */
+  .bcs-meter{
+    position:relative;height:10px;border-radius:5px;
+    background:linear-gradient(to right,var(--danger) 0%,var(--warn) 40%,var(--safe) 70%);
+    overflow:visible;
+  }
+  .bcs-marker{
+    position:absolute;top:-4px;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--text);border:2px solid var(--bg);
+    transform:translateX(-50%);
+    transition:left 0.8s ease;
+    box-shadow:0 0 8px rgba(255,255,255,0.3);
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:24px;right:24px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:14px 18px;
+    display:flex;align-items:center;gap:12px;
+    font-size:13px;max-width:320px;
+    animation:slideIn 0.3s ease;
+    z-index:999;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+  .toast-icon{font-size:18px}
+
+  /* Live indicator */
+  .live-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--safe);
+    position:relative;display:inline-block;
+  }
+  .live-dot::after{
+    content:'';position:absolute;inset:0;border-radius:50%;
+    background:var(--safe);animation:ping 1.5s infinite;
+  }
+
+  /* Step indicator */
+  .steps{display:flex;align-items:center;margin-bottom:28px}
+  .step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500}
+  .step-num{
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;
+    border:2px solid var(--border);color:var(--muted);
+    transition:all 0.3s;
+  }
+  .step.active .step-num{border-color:var(--accent);color:var(--accent);background:rgba(0,212,168,0.1)}
+  .step.done .step-num{border-color:var(--accent);background:var(--accent);color:#0a0e1a}
+  .step-line{flex:1;height:1px;background:var(--border);margin:0 8px}
+  .step.active .step-label{color:var(--text)}
+  .step-label{color:var(--muted)}
+
+  /* Claim timeline */
+  .timeline{position:relative;padding-left:24px}
+  .timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:var(--border)}
+  .timeline-item{position:relative;margin-bottom:16px}
+  .timeline-dot{
+    position:absolute;left:-20px;top:4px;
+    width:14px;height:14px;border-radius:50%;
+    background:var(--surface2);border:2px solid var(--border);
+  }
+  .timeline-dot.active{border-color:var(--accent);background:var(--accent)}
+  .timeline-dot.done{border-color:var(--safe);background:var(--safe)}
+  .timeline-dot.pending{border-color:var(--warn);background:transparent;animation:pulse 1.5s infinite}
+  .timeline-title{font-size:13px;font-weight:500}
+  .timeline-time{font-size:11px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+
+  /* Map zone */
+  .zone-map{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;height:160px;display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;font-size:12px;color:var(--muted);
+  }
+  .zone-dot{
+    position:absolute;width:12px;height:12px;border-radius:50%;
+  }
+  .zone-ring{
+    position:absolute;border-radius:50%;border:1px solid;
+    animation:ping 2s infinite;
+  }
+
+  /* Chart bar */
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:80px}
+  .bar{flex:1;border-radius:4px 4px 0 0;transition:height 0.6s ease;min-width:20px;position:relative}
+  .bar-label{font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
+
+  /* Scrollable area */
+  .scroll-area{max-height:300px;overflow-y:auto;padding-right:4px}
+
+  /* Divider */
+  .divider{height:1px;background:var(--border);margin:20px 0}
+
+  /* Info row */
+  .info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(30,45,69,0.5);font-size:13px}
+  .info-row:last-child{border-bottom:none}
+  .info-key{color:var(--muted)}
+  .info-val{font-weight:500}
+
+  /* Alert */
+  .alert{padding:12px 16px;border-radius:8px;font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+  .alert-warn{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);color:var(--warn)}
+  .alert-success{background:rgba(0,212,168,0.1);border:1px solid rgba(0,212,168,0.25);color:var(--safe)}
+  .alert-danger{background:rgba(224,92,92,0.1);border:1px solid rgba(224,92,92,0.25);color:var(--danger)}
+
+  /* Loading spinner */
+  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite}
+
+  @media(max-width:768px){
+    .grid2,.grid3,.grid4{grid-template-columns:1fr}
+    .nav-tabs{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState, useEffect, useRef} = React;
+
+// ── mock data ────────────────────────────────────────────────
+const WORKERS = [
+  {id:'W001',name:'Ravi Kumar',city:'Bengaluru',zone:'Koramangala',pincode:'560034',platform:'Swiggy',earnings:4200,plan:'Standard',premium:67,bcs:82,status:'active',claims:2,joined:'2026-02-10'},
+  {id:'W002',name:'Priya Sharma',city:'Chennai',zone:'Anna Nagar',pincode:'600040',platform:'Zomato',earnings:3800,plan:'Basic',premium:44,bcs:91,status:'active',claims:0,joined:'2026-01-28'},
+  {id:'W003',name:'Arjun Mehta',city:'Mumbai',zone:'Andheri East',pincode:'400069',platform:'Swiggy',earnings:5100,plan:'Max',premium:96,bcs:34,status:'flagged',claims:5,joined:'2026-01-15'},
+  {id:'W004',name:'Deepa Nair',city:'Hyderabad',zone:'Banjara Hills',pincode:'500034',platform:'Zomato',earnings:3500,plan:'Basic',premium:41,bcs:74,status:'active',claims:1,joined:'2026-02-20'},
+];
+
+const TRIGGERS = [
+  {id:'T1',name:'Heavy Rain',icon:'🌧️',source:'OpenWeatherMap',threshold:'Rainfall > 25mm / 3hr',current:'31.2mm',unit:'mm/3hr',value:31.2,limit:25,fired:true,color:'#60a5fa'},
+  {id:'T2',name:'Extreme Heat',icon:'🌡️',source:'OpenWeatherMap',threshold:'Temp > 43°C',current:'38.4°C',unit:'°C',value:38.4,limit:43,fired:false,color:'#f97316'},
+  {id:'T3',name:'Severe AQI',icon:'💨',source:'OpenAQ',threshold:'AQI > 400',current:'287',unit:'AQI',value:287,limit:400,fired:false,color:'#a78bfa'},
+  {id:'T4',name:'Local Curfew',icon:'🚧',source:'NewsAPI',threshold:'Zone flagged',current:'Clear',unit:'',value:0,limit:1,fired:false,color:'#f59e0b'},
+  {id:'T5',name:'Platform Outage',icon:'📵',source:'Mock Platform API',threshold:'Downtime > 2hr',current:'Operational',unit:'',value:0,limit:1,fired:false,color:'#e05c5c'},
+];
+
+const CLAIMS = [
+  {id:'CLM-0042',worker:'Ravi Kumar',zone:'Koramangala',trigger:'Heavy Rain',amount:280,status:'paid',bcs:82,time:'14:32',date:'Mar 18'},
+  {id:'CLM-0041',worker:'Deepa Nair',zone:'Banjara Hills',trigger:'Heavy Rain',amount:210,status:'paid',bcs:74,time:'11:20',date:'Mar 18'},
+  {id:'CLM-0040',worker:'Arjun Mehta',zone:'Andheri East',trigger:'Heavy Rain',amount:380,status:'flagged',bcs:34,time:'09:15',date:'Mar 17'},
+  {id:'CLM-0039',worker:'Ravi Kumar',zone:'Koramangala',trigger:'Severe AQI',amount:180,status:'paid',bcs:88,time:'16:50',date:'Mar 12'},
+  {id:'CLM-0038',worker:'Arjun Mehta',zone:'Andheri East',trigger:'Heavy Rain',amount:380,status:'rejected',bcs:28,time:'08:00',date:'Mar 10'},
+];
+
+const WEEKLY_DATA = [62,48,85,91,73,67,88];
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// ── helpers ───────────────────────────────────────────────────
+function BCSBadge({score}){
+  if(score>=70) return <span className="badge badge-green"><span className="badge-dot"/>BCS {score}</span>;
+  if(score>=40) return <span className="badge badge-yellow"><span className="badge-dot"/>BCS {score}</span>;
+  return <span className="badge badge-red"><span className="badge-dot"/>BCS {score}</span>;
+}
+
+function StatusBadge({status}){
+  const map={active:'badge-green',flagged:'badge-yellow',rejected:'badge-red',paid:'badge-green',pending:'badge-yellow'};
+  return <span className={`badge ${map[status]||'badge-blue'}`}>{status}</span>;
+}
+
+function Toast({msg,type,onClose}){
+  useEffect(()=>{const t=setTimeout(onClose,3500);return()=>clearTimeout(t)},[]);
+  const icons={success:'✅',warning:'⚠️',error:'❌',info:'ℹ️'};
+  return(
+    <div className="toast">
+      <span className="toast-icon">{icons[type]||'ℹ️'}</span>
+      <span>{msg}</span>
+      <span style={{marginLeft:'auto',cursor:'pointer',color:'var(--muted)',fontSize:16}} onClick={onClose}>×</span>
+    </div>
+  );
+}
+
+// ── ONBOARDING PAGE ───────────────────────────────────────────
+function OnboardingPage({onComplete}){
+  const [step,setStep]=useState(1);
+  const [form,setForm]=useState({name:'',city:'',zone:'',pincode:'',platform:'',earnings:'',plan:'Standard'});
+  const [loading,setLoading]=useState(false);
+  const [quote,setQuote]=useState(null);
+
+  const premiumMap={Basic:39,Standard:59,Max:89};
+  const payoutMap={Basic:'₹900',Standard:'₹1,400',Max:'₹2,200'};
+  const coverageMap={Basic:'30%',Standard:'40%',Max:'55%'};
+
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const calcPremium=()=>{
+    let base=premiumMap[form.plan]||59;
+    const zone=form.zone.toLowerCase();
+    if(zone.includes('koramangala')||zone.includes('hsr')) base+=15;
+    const m=new Date().getMonth();
+    if(m>=5&&m<=8) base+=15;
+    setQuote({premium:base,payout:payoutMap[form.plan],coverage:coverageMap[form.plan],risk:base>70?'High':'Medium'});
+  };
+
+  const handleNext=()=>{
+    if(step===2){calcPremium();}
+    if(step<3) setStep(s=>s+1);
+  };
+
+  const handleActivate=()=>{
+    setLoading(true);
+    setTimeout(()=>{setLoading(false);onComplete(form,quote);},1800);
+  };
+
+  const steps=[{n:1,l:'Profile'},{n:2,l:'Location & Plan'},{n:3,l:'Review & Activate'}];
+
+  return(
+    <div className="page fade-in">
+      <div className="page-header">
+        <div className="page-title serif">Worker Onboarding</div>
+        <div className="page-subtitle">Set up income protection in under 2 minutes</div>
+      </div>
+
+      <div className="steps">
+        {steps.map((s,i)=>(
+          <React.Fragment key={s.n}>
+            <div className={`step ${step===s.n?'active':step>s.n?'done':''}`}>
+              <div className="step-num">{step>s.n?'✓':s.n}</div>
+              <span className="step-label">{s.l}</span>
+            </div>
+            {i<steps.length-1&&<div className="step-line"/>}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div style={{maxWidth:560}}>
+        {step===1&&(
+          <div className="card fade-in">
+            <div className="card-title">Personal Details</div>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input className="form-input" placeholder="e.g. Ravi Kumar" value={form.name} onChange={e=>f('name',e.target.value)}/>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Delivery Platform</label>
+              <select className="form-select" value={form.platform} onChange={e=>f('platform',e.target.value)}>
+                <option value="">Select platform</option>
+                <option>Swiggy</option>
+                <option>Zomato</option>
+                <option>Blinkit</option>
+                <option>Zepto</option>
+                <option>Amazon Flex</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Average Weekly Earnings (₹)</label>
+              <input className="form-input" type="number" placeholder="e.g. 4200" value={form.earnings} onChange={e=>f('earnings',e.target.value)}/>
+            </div>
+            <button className="btn btn-primary btn-full" onClick={handleNext} disabled={!form.name||!form.platform||!form.earnings}>
+              Continue →
+            </button>
+          </div>
+        )}
+
+        {step===2&&(
+          <div className="card fade-in">
+            <div className="card-title">Location & Coverage Plan</div>
+            <div className="grid2" style={{gap:12,marginBottom:16}}>
+              <div className="form-group" style={{marginBottom:0}}>
+                <label className="form-label">City</label>
+                <select className="form-select" value={form.city} onChange={e=>f('city',e.target.value)}>
+                  <option value="">Select city</option>
+                  <option>Bengaluru</option>
+                  <option>Chennai</option>
+                  <option>Mumbai</option>
+                  <option>Hyderabad</option>
+                  <option>Delhi NCR</option>
+                </select>
+              </div>
+              <div className="form-group" style={{marginBottom:0}}>
+                <label className="form-label">Pin Code</label>
+                <input className="form-input" placeholder="e.g. 560034" value={form.pincode} onChange={e=>f('pincode',e.target.value)}/>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Zone / Area</label>
+              <input className="form-input" placeholder="e.g. Koramangala" value={form.zone} onChange={e=>f('zone',e.target.value)}/>
+            </div>
+            <div className="card-title" style={{marginBottom:12}}>Coverage Plan</div>
+            <div style={{display:'flex',gap:10,marginBottom:20}}>
+              {['Basic','Standard','Max'].map(p=>(
+                <div key={p} onClick={()=>f('plan',p)} style={{
+                  flex:1,padding:'14px 10px',border:`2px solid ${form.plan===p?'var(--accent)':'var(--border)'}`,
+                  borderRadius:10,cursor:'pointer',textAlign:'center',
+                  background:form.plan===p?'rgba(0,212,168,0.08)':'var(--surface2)',
+                  transition:'all 0.2s'
+                }}>
+                  <div style={{fontSize:13,fontWeight:600,color:form.plan===p?'var(--accent)':'var(--text)'}}>{p}</div>
+                  <div style={{fontSize:20,fontWeight:700,margin:'6px 0'}}>₹{premiumMap[p]}<span style={{fontSize:11,fontWeight:400,color:'var(--muted)'}}>/wk</span></div>
+                  <div style={{fontSize:11,color:'var(--muted)'}}>{coverageMap[p]} income</div>
+                  <div style={{fontSize:11,color:'var(--muted)'}}>Max {payoutMap[p]}/wk</div>
+                </div>
+              ))}
+            </div>
+            <button className="btn btn-primary btn-full" onClick={handleNext} disabled={!form.city||!form.zone}>
+              Get My Quote →
+            </button>
+          </div>
+        )}
+
+        {step===3&&quote&&(
+          <div className="fade-in">
+            <div className="alert alert-success">
+              <span>✅</span>
+              <span>Your AI risk profile is ready. Weekly premium calculated for <strong>{form.zone}, {form.city}</strong>.</span>
+            </div>
+            <div className="card" style={{marginBottom:16}}>
+              <div className="card-title">Your Policy Summary</div>
+              <div style={{display:'flex',gap:16,margin:'12px 0 16px'}}>
+                <div style={{textAlign:'center',flex:1,padding:16,background:'var(--surface2)',borderRadius:10}}>
+                  <div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>WEEKLY PREMIUM</div>
+                  <div style={{fontSize:32,fontWeight:700,color:'var(--accent)'}}>₹{quote.premium}</div>
+                </div>
+                <div style={{textAlign:'center',flex:1,padding:16,background:'var(--surface2)',borderRadius:10}}>
+                  <div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>MAX PAYOUT</div>
+                  <div style={{fontSize:32,fontWeight:700,color:'var(--text)'}}>{quote.payout}</div>
+                </div>
+              </div>
+              <div className="info-row"><span className="info-key">Name</span><span className="info-val">{form.name}</span></div>
+              <div className="info-row"><span className="info-key">Platform</span><span className="info-val">{form.platform}</span></div>
+              <div className="info-row"><span className="info-key">Zone</span><span className="info-val">{form.zone}, {form.city} — {form.pincode}</span></div>
+              <div className="info-row"><span className="info-key">Plan</span><span className="info-val">{form.plan} ({quote.coverage} income covered)</span></div>
+              <div className="info-row"><span className="info-key">Risk Level</span><span className="info-val" style={{color:quote.risk==='High'?'var(--danger)':'var(--warn)'}}>{quote.risk}</span></div>
+              <div className="info-row"><span className="info-key">Declared Earnings</span><span className="info-val">₹{form.earnings}/week</span></div>
+            </div>
+            <div style={{fontSize:12,color:'var(--muted)',marginBottom:16,lineHeight:1.6}}>
+              Coverage is for <strong style={{color:'var(--text)'}}>income loss only</strong> due to parametric triggers (weather, AQI, curfew, outage). Health, accident, and vehicle repairs are excluded.
+            </div>
+            <button className="btn btn-primary btn-full" onClick={handleActivate} disabled={loading}>
+              {loading?<><span className="spinner"/>Activating Policy...</>:'🛡️ Activate Policy'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── TRIGGERS PAGE ────────────────────────────────────────────
+function TriggersPage({onClaim}){
+  const [triggers,setTriggers]=useState(TRIGGERS);
+  const [simulating,setSimulating]=useState(null);
+  const [lastFired,setLastFired]=useState(null);
+
+  const simulate=(id)=>{
+    setSimulating(id);
+    setTimeout(()=>{
+      setTriggers(p=>p.map(t=>t.id===id?{...t,fired:true,current:id==='T1'?'41.8mm':id==='T3'?'423':'Active'}:t));
+      setSimulating(null);
+      setLastFired(id);
+      if(onClaim) onClaim(id);
+    },2000);
+  };
+
+  const reset=(id)=>{
+    setTriggers(p=>p.map(t=>t.id===id?TRIGGERS.find(x=>x.id===id):t));
+    setLastFired(null);
+  };
+
+  return(
+    <div className="page fade-in">
+      <div className="page-header" style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+        <div>
+          <div className="page-title serif">Parametric Trigger Engine</div>
+          <div className="page-subtitle">Real-time monitoring across 5 disruption signals — polling every 15 minutes</div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,color:'var(--safe)'}}>
+          <span className="live-dot"/><span>LIVE</span>
+        </div>
+      </div>
+
+      {lastFired&&(
+        <div className="alert alert-warn fade-in">
+          <span>⚡</span>
+          <span><strong>Trigger fired!</strong> Automated claims initiated for all active policyholders in the affected zone. Zero-touch payouts processing.</span>
+        </div>
+      )}
+
+      <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:28}}>
+        {triggers.map(t=>(
+          <div key={t.id} className={`trigger-card ${t.fired?'active':''}`}>
+            <div style={{display:'flex',alignItems:'center',flex:1}}>
+              <span className="trigger-icon">{t.icon}</span>
+              <div>
+                <div className="trigger-name">{t.name}</div>
+                <div className="trigger-threshold">{t.source} · Threshold: {t.threshold}</div>
+              </div>
+            </div>
+            <div style={{textAlign:'center',marginRight:20}}>
+              <div className="trigger-value" style={{color:t.fired?'var(--danger)':t.value/t.limit>0.7?'var(--warn)':'var(--text)'}}>{t.current}</div>
+              {t.unit&&<div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{t.unit}</div>}
+            </div>
+            {t.fired
+              ?<><span className="badge badge-red" style={{marginRight:12}}><span className="badge-dot"/>FIRED</span>
+                <button className="btn btn-secondary btn-sm" onClick={()=>reset(t.id)}>Reset</button></>
+              :<button className="btn btn-sm" style={{background:'rgba(224,92,92,0.12)',color:'var(--danger)',border:'1px solid rgba(224,92,92,0.25)'}}
+                onClick={()=>simulate(t.id)} disabled={simulating===t.id}>
+                  {simulating===t.id?<><span className="spinner"/>Simulating...</>:'⚡ Simulate'}
+                </button>
+            }
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <div className="card-title">How a Trigger Becomes a Payout</div>
+        <div style={{display:'flex',gap:0,marginTop:12,overflowX:'auto'}}>
+          {['Threshold crossed','Fraud engine runs BCS','Claim auto-created','Payout via UPI'].map((s,i)=>(
+            <div key={i} style={{flex:1,textAlign:'center',position:'relative',minWidth:120}}>
+              <div style={{width:36,height:36,borderRadius:'50%',background:'var(--surface2)',border:'2px solid var(--border)',
+                display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 8px',fontSize:14,fontWeight:600,color:'var(--accent)'}}>
+                {i+1}
+              </div>
+              <div style={{fontSize:12,color:'var(--muted)',lineHeight:1.4}}>{s}</div>
+              {i<3&&<div style={{position:'absolute',right:0,top:14,fontSize:18,color:'var(--border)'}}>→</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── BCS / FRAUD PAGE ──────────────────────────────────────────
+function FraudPage(){
+  const [selected,setSelected]=useState(null);
+  const [analyzing,setAnalyzing]=useState(false);
+  const [result,setResult]=useState(null);
+
+  const analyze=(worker)=>{
+    setSelected(worker);
+    setResult(null);
+    setAnalyzing(true);
+    setTimeout(()=>{setAnalyzing(false);setResult(worker);},2200);
+  };
+
+  const getLayers=(bcs)=>[
+    {name:'Movement Intelligence',score:bcs>60?Math.min(bcs+8,98):bcs-10,pass:bcs>60,detail:bcs>60?'Natural road-speed motion detected':'Static device — no movement pattern'},
+    {name:'Environmental Cross-Match',score:bcs>60?Math.min(bcs+5,97):bcs-8,pass:bcs>60,detail:bcs>60?'Rain intensity matches halt threshold':'Traffic API: clear roads contradict claim'},
+    {name:'Sensor & Behavioral Profile',score:bcs>60?bcs-3:bcs-12,pass:bcs>60,detail:bcs>60?'Accelerometer consistent with sheltering':'Flat sensor data — no real movement'},
+    {name:'Fraud Ring Detection',score:bcs>60?Math.min(bcs+2,96):bcs-5,pass:bcs>40,detail:bcs>40?'No coordinated spike detected':'3 claims from same device cluster'},
+  ];
+
+  const getVerdict=(bcs)=>{
+    if(bcs>=70) return {text:'Auto-Approved',color:'var(--safe)',action:'Payout within 5 minutes'};
+    if(bcs>=40) return {text:'Soft Review',color:'var(--warn)',action:'Passive checks — payout within 2 hours'};
+    return {text:'Claim Held',color:'var(--danger)',action:'Location confirmation requested via WhatsApp'};
+  };
+
+  return(
+    <div className="page fade-in">
+      <div className="page-header">
+        <div className="page-title serif">Adversarial Defense & BCS Engine</div>
+        <div className="page-subtitle">Behavioral Consistency Score — 4-layer anti-spoofing analysis</div>
+      </div>
+
+      <div className="grid2" style={{alignItems:'start'}}>
+        <div>
+          <div style={{fontSize:12,fontWeight:500,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:12}}>Select Worker to Analyze</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {WORKERS.map(w=>(
+              <div key={w.id} onClick={()=>analyze(w)}
+                style={{padding:'14px 16px',borderRadius:10,cursor:'pointer',
+                  border:`1px solid ${selected?.id===w.id?'var(--accent)':'var(--border)'}`,
+                  background:selected?.id===w.id?'rgba(0,212,168,0.05)':'var(--surface)',
+                  transition:'all 0.2s',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:500}}>{w.name}</div>
+                  <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{w.zone} · {w.platform}</div>
+                </div>
+                <BCSBadge score={w.bcs}/>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          {analyzing&&(
+            <div className="card fade-in" style={{textAlign:'center',padding:40}}>
+              <div className="spinner" style={{margin:'0 auto 16px',width:32,height:32,borderWidth:3}}/>
+              <div style={{fontSize:14,color:'var(--muted)'}}>Running 4-layer BCS analysis...</div>
+              <div style={{fontSize:12,color:'var(--muted)',marginTop:6}}>Checking sensors · Cross-matching weather · Ring detection</div>
+            </div>
+          )}
+          {result&&!analyzing&&(()=>{
+            const verdict=getVerdict(result.bcs);
+            const layers=getLayers(result.bcs);
+            return(
+              <div className="fade-in">
+                <div className="card" style={{marginBottom:16}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                    <div>
+                      <div style={{fontSize:16,fontWeight:600}}>{result.name}</div>
+                      <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{result.zone} · Claim under review</div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:32,fontWeight:700,color:result.bcs>=70?'var(--safe)':result.bcs>=40?'var(--warn)':'var(--danger)'}}>{result.bcs}</div>
+                      <div style={{fontSize:11,color:'var(--muted)'}}>BCS Score</div>
+                    </div>
+                  </div>
+                  <div style={{position:'relative',marginBottom:20}}>
+                    <div className="bcs-meter"/>
+                    <div className="bcs-marker" style={{left:`${result.bcs}%`}}/>
+                    <div style={{display:'flex',justifyContent:'space-between',marginTop:10,fontSize:10,color:'var(--muted)'}}>
+                      <span>0 — Held</span><span>40 — Soft Review</span><span>70 — Auto-Approve</span><span>100</span>
+                    </div>
+                  </div>
+                  <div style={{padding:'12px 16px',borderRadius:8,background:`${verdict.color}15`,border:`1px solid ${verdict.color}40`,marginBottom:4}}>
+                    <div style={{fontSize:14,fontWeight:600,color:verdict.color}}>{verdict.text}</div>
+                    <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{verdict.action}</div>
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-title">Layer-by-Layer Breakdown</div>
+                  <div style={{marginTop:12,display:'flex',flexDirection:'column',gap:12}}>
+                    {layers.map((l,i)=>(
+                      <div key={i}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                          <div style={{display:'flex',alignItems:'center',gap:8}}>
+                            <span style={{fontSize:14}}>{l.pass?'✅':'🚩'}</span>
+                            <span style={{fontSize:13,fontWeight:500}}>{l.name}</span>
+                          </div>
+                          <span style={{fontSize:12,fontFamily:'DM Mono',color:l.pass?'var(--safe)':'var(--danger)'}}>{l.score}/100</span>
+                        </div>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width:`${l.score}%`,background:l.pass?'var(--safe)':'var(--danger)'}}/>
+                        </div>
+                        <div style={{fontSize:11,color:'var(--muted)',marginTop:4}}>{l.detail}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+          {!result&&!analyzing&&(
+            <div className="card" style={{textAlign:'center',padding:40,color:'var(--muted)',fontSize:14}}>
+              ← Select a worker to run BCS analysis
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ADMIN DASHBOARD ───────────────────────────────────────────
+function AdminPage(){
+  const maxBar=Math.max(...WEEKLY_DATA);
+  const totalPolicies=WORKERS.length;
+  const activeClaims=CLAIMS.filter(c=>c.status==='paid').length;
+  const flaggedClaims=CLAIMS.filter(c=>c.status==='flagged').length;
+  const totalPayout=CLAIMS.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
+
+  return(
+    <div className="page fade-in">
+      <div className="page-header" style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+        <div>
+          <div className="page-title serif">Insurer Admin Dashboard</div>
+          <div className="page-subtitle">Week of Mar 17–23, 2026 · Bengaluru cluster</div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 14px',background:'rgba(0,212,168,0.08)',border:'1px solid rgba(0,212,168,0.2)',borderRadius:20,fontSize:12,color:'var(--safe)'}}>
+          <span className="live-dot"/> Live monitoring
+        </div>
+      </div>
+
+      <div className="grid4" style={{marginBottom:20}}>
+        {[
+          {label:'Active Policies',value:totalPolicies,change:'+2 this week',up:true,icon:'🛡️'},
+          {label:'Claims Processed',value:activeClaims,change:'₹'+totalPayout+' paid out',up:true,icon:'✅'},
+          {label:'Flagged Claims',value:flaggedClaims,change:'Under review',up:false,icon:'🚩'},
+          {label:'Loss Ratio',value:'34%',change:'Healthy threshold <60%',up:true,icon:'📊'},
+        ].map((s,i)=>(
+          <div key={i} className="stat-card">
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div className="stat-label">{s.label}</div>
+              <span style={{fontSize:20}}>{s.icon}</span>
+            </div>
+            <div className="stat-value">{s.value}</div>
+            <div className={`stat-change ${s.up?'up':'down'}`}>{s.change}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid2" style={{marginBottom:20}}>
+        <div className="card">
+          <div className="card-title">Weekly Claims Volume</div>
+          <div className="bar-chart" style={{marginTop:16}}>
+            {WEEKLY_DATA.map((v,i)=>(
+              <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center'}}>
+                <div className="bar" style={{height:`${(v/maxBar)*70}px`,background:i===6?'var(--accent)':'var(--surface2)',border:`1px solid ${i===6?'var(--accent)':'var(--border)'}`,width:'100%'}}/>
+                <div className="bar-label">{DAYS[i]}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginTop:8,textAlign:'center'}}>Claims initiated this week · Sunday peak due to rain trigger</div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">7-Day Risk Forecast</div>
+          <div style={{marginTop:12,display:'flex',flexDirection:'column',gap:8}}>
+            {[
+              {zone:'Koramangala, BLR',risk:87,label:'High'},
+              {zone:'Andheri East, MUM',risk:72,label:'High'},
+              {zone:'Anna Nagar, CHN',risk:38,label:'Low'},
+              {zone:'Banjara Hills, HYD',risk:54,label:'Medium'},
+            ].map((r,i)=>(
+              <div key={i}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:4,fontSize:13}}>
+                  <span>{r.zone}</span>
+                  <span style={{fontFamily:'DM Mono',color:r.risk>70?'var(--danger)':r.risk>50?'var(--warn)':'var(--safe)'}}>{r.risk}%</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{width:`${r.risk}%`,background:r.risk>70?'var(--danger)':r.risk>50?'var(--warn)':'var(--safe)'}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:11,color:'var(--muted)',marginTop:12}}>Powered by Prophet model · Next 7 days</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-title" style={{marginBottom:12}}>Recent Claims Log</div>
+        <div style={{overflowX:'auto'}}>
+          <table className="table">
+            <thead><tr>
+              <th>Claim ID</th><th>Worker</th><th>Zone</th><th>Trigger</th><th>Amount</th><th>BCS Score</th><th>Status</th><th>Time</th>
+            </tr></thead>
+            <tbody>
+              {CLAIMS.map(c=>(
+                <tr key={c.id}>
+                  <td><span className="mono" style={{fontSize:12}}>{c.id}</span></td>
+                  <td style={{fontWeight:500}}>{c.worker}</td>
+                  <td style={{color:'var(--muted)'}}>{c.zone}</td>
+                  <td>{c.trigger}</td>
+                  <td style={{fontWeight:600,color:'var(--safe)'}}>₹{c.amount}</td>
+                  <td><BCSBadge score={c.bcs}/></td>
+                  <td><StatusBadge status={c.status}/></td>
+                  <td style={{color:'var(--muted)',fontFamily:'DM Mono',fontSize:12}}>{c.date} {c.time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CLAIMS TIMELINE ───────────────────────────────────────────
+function ClaimsPage(){
+  const [active,setActive]=useState(CLAIMS[0]);
+  const steps=[
+    {id:'trigger',label:'Trigger detected',sub:'OpenWeatherMap — 41.8mm/3hr',done:true},
+    {id:'bcs',label:'BCS analysis complete',sub:`Score: ${active.bcs} — ${active.bcs>=70?'Auto-approved':active.bcs>=40?'Soft review':'Held'}`,done:true},
+    {id:'claim',label:'Claim auto-created',sub:`${active.id} · ${active.trigger}`,done:true},
+    {id:'payout',label:'Payout processed',sub:`₹${active.amount} → UPI (Razorpay sandbox)`,done:active.status==='paid'},
+    {id:'notify',label:'Worker notified',sub:'Push notification + WhatsApp confirmation',done:active.status==='paid'},
+  ];
+
+  return(
+    <div className="page fade-in">
+      <div className="page-header">
+        <div className="page-title serif">Claims Management</div>
+        <div className="page-subtitle">Zero-touch automated claim processing pipeline</div>
+      </div>
+      <div className="grid2" style={{alignItems:'start'}}>
+        <div>
+          <div style={{fontSize:12,fontWeight:500,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.5px',marginBottom:12}}>Recent Claims</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {CLAIMS.map(c=>(
+              <div key={c.id} onClick={()=>setActive(c)}
+                style={{padding:'14px 16px',borderRadius:10,cursor:'pointer',
+                  border:`1px solid ${active?.id===c.id?'var(--accent)':'var(--border)'}`,
+                  background:active?.id===c.id?'rgba(0,212,168,0.05)':'var(--surface)',
+                  transition:'all 0.2s'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+                  <span className="mono" style={{fontSize:12,color:'var(--muted)'}}>{c.id}</span>
+                  <StatusBadge status={c.status}/>
+                </div>
+                <div style={{fontSize:14,fontWeight:500}}>{c.worker}</div>
+                <div style={{display:'flex',justifyContent:'space-between',marginTop:4,fontSize:12,color:'var(--muted)'}}>
+                  <span>{c.trigger}</span>
+                  <span style={{color:'var(--safe)',fontWeight:600}}>₹{c.amount}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {active&&(
+          <div className="fade-in">
+            <div className="card" style={{marginBottom:16}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <div>
+                  <div style={{fontSize:16,fontWeight:600}}>{active.id}</div>
+                  <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{active.date} · {active.time}</div>
+                </div>
+                <StatusBadge status={active.status}/>
+              </div>
+              <div className="info-row"><span className="info-key">Worker</span><span className="info-val">{active.worker}</span></div>
+              <div className="info-row"><span className="info-key">Zone</span><span className="info-val">{active.zone}</span></div>
+              <div className="info-row"><span className="info-key">Trigger</span><span className="info-val">{active.trigger}</span></div>
+              <div className="info-row"><span className="info-key">Payout Amount</span><span className="info-val" style={{color:'var(--safe)',fontWeight:700}}>₹{active.amount}</span></div>
+              <div className="info-row"><span className="info-key">BCS Score</span><span><BCSBadge score={active.bcs}/></span></div>
+            </div>
+
+            <div className="card">
+              <div className="card-title" style={{marginBottom:16}}>Processing Timeline</div>
+              <div className="timeline">
+                {steps.map((s,i)=>(
+                  <div key={i} className="timeline-item">
+                    <div className={`timeline-dot ${s.done?'done':i===steps.findIndex(x=>!x.done)?'pending':''}`}/>
+                    <div className="timeline-title" style={{color:s.done?'var(--text)':'var(--muted)'}}>{s.label}</div>
+                    <div className="timeline-time">{s.sub}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {active.status==='flagged'&&(
+              <div className="alert alert-warn fade-in" style={{marginTop:16}}>
+                <span>⚠️</span>
+                <div>
+                  <div style={{fontWeight:600,marginBottom:2}}>Soft Review — BCS {active.bcs}</div>
+                  <div style={{fontSize:12}}>Passive checks running. Payout within 2 hours if verified. Worker notified with neutral message.</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── ROOT APP ──────────────────────────────────────────────────
+function App(){
+  const [tab,setTab]=useState('onboard');
+  const [toast,setToast]=useState(null);
+  const [registered,setRegistered]=useState(false);
+  const [pendingClaims,setPendingClaims]=useState(0);
+
+  const showToast=(msg,type='info')=>setToast({msg,type});
+
+  const handleOnboardComplete=(form,quote)=>{
+    setRegistered(true);
+    setTab('triggers');
+    showToast(`Policy activated for ${form.name}! ₹${quote.premium}/week premium starts today.`,'success');
+  };
+
+  const handleClaim=(triggerId)=>{
+    const names={T1:'Heavy Rain',T3:'Severe AQI',T4:'Curfew',T5:'Platform Outage'};
+    showToast(`${names[triggerId]||'Disruption'} trigger fired! Auto-claims initiated for affected workers.`,'warning');
+    setPendingClaims(p=>p+1);
+    setTimeout(()=>showToast('BCS analysis complete. 3 claims auto-approved, 1 flagged for review.','info'),3000);
+  };
+
+  const TABS=[
+    {id:'onboard',label:'Onboarding'},
+    {id:'triggers',label:'Triggers'},
+    {id:'fraud',label:'Fraud / BCS'},
+    {id:'claims',label:'Claims',badge:pendingClaims>0?pendingClaims:null},
+    {id:'admin',label:'Admin'},
+  ];
+
+  return(
+    <>
+      <nav className="nav">
+        <div className="nav-logo">
+          <div className="nav-logo-icon">🛡️</div>
+          <span>GigShield</span>
+          <span style={{fontSize:12,color:'var(--muted)',fontWeight:400,marginLeft:4}}>v1.0 · Phase 1 Demo</span>
+        </div>
+        <div className="nav-tabs">
+          {TABS.map(t=>(
+            <button key={t.id} className={`nav-tab ${tab===t.id?'active':''}`} onClick={()=>setTab(t.id)}>
+              {t.label}{t.badge&&<span className="nav-badge">{t.badge}</span>}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {tab==='onboard'&&<OnboardingPage onComplete={handleOnboardComplete}/>}
+      {tab==='triggers'&&<TriggersPage onClaim={handleClaim}/>}
+      {tab==='fraud'&&<FraudPage/>}
+      {tab==='claims'&&<ClaimsPage/>}
+      {tab==='admin'&&<AdminPage/>}
+
+      {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
