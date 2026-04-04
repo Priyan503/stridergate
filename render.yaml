@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: gigshield
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        value: "" # Leave blank to test mock in-memory fallback, or add a MongoDB connection string
+      - key: OPENWEATHER_API_KEY
+        value: "" # Add your OpenWeatherMap key to enable live weather
+      - key: JWT_SECRET
+        value: "super_secret_gigshield_key_2026"
+      - key: RAZORPAY_KEY_ID
+        value: "" # Add your Razorpay test key ID
+      - key: RAZORPAY_KEY_SECRET
+        value: "" # Add your Razorpay test secret
