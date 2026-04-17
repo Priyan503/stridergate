@@ -2,11 +2,11 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY requirements.txt ./
+COPY ml-service/requirements.txt ./
 # We add --no-cache-dir to keep the image small
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY ml-service/ .
 
 EXPOSE 8001
 
