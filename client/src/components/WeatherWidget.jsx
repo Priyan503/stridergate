@@ -15,7 +15,7 @@ export default function WeatherWidget({ city }) {
   const fetchWeather = async () => {
     setLoading(true);
     try {
-      const res  = await fetch(`/api/weather/${encodeURIComponent(city || 'Bengaluru')}`);
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/weather/${encodeURIComponent(city || 'Bengaluru')}`);
       const data = await res.json();
       if (data.success) { setWeather(data.data); setLastRefresh(new Date()); }
     } catch {

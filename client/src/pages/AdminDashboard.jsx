@@ -194,22 +194,22 @@ function Workers({ showToast }) {
   const [form, setForm] = useState({ name: '', city: '', zone: '', pincode: '', platform: 'Swiggy', earnings: '', plan: 'Standard' });
   const [adding, setAdding] = useState(false);
 
-  const load = () => fetch('/api/workers').then(r => r.json()).then(d => { if (d.success) setWorkers(d.data); });
+  const load = () => fetch((import.meta.env.VITE_API_URL || '') + '/api/workers').then(r => r.json()).then(d => { if (d.success) setWorkers(d.data); });
   useEffect(() => { load(); }, []);
 
   const doVerify = async (id) => {
-    const res  = await fetch(`/api/workers/${id}/verify`, { method: 'PATCH' });
+    const res  = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/workers/${id}/verify`, { method: 'PATCH' });
     const data = await res.json();
     if (data.success) { setWorkers(p => p.map(w => w.workerId === id ? data.data : w)); showToast(`${data.data.name} verified ✓`, 'success'); }
   };
   const doStatus = async (id, status) => {
-    const res  = await fetch(`/api/workers/${id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+    const res  = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/workers/${id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
     const data = await res.json();
     if (data.success) { setWorkers(p => p.map(w => w.workerId === id ? data.data : w)); showToast(`Status updated to ${status}`, 'info'); }
   };
   const doDelete = async (id, name) => {
     if (!confirm(`Remove ${name}? This cannot be undone.`)) return;
-    const res = await fetch(`/api/workers/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/workers/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (data.success) { setWorkers(p => p.filter(w => w.workerId !== id)); showToast(`${name} removed`, 'warning'); }
   };
@@ -218,7 +218,7 @@ function Workers({ showToast }) {
     if (!form.name || !form.city || !form.zone || !form.earnings) return showToast('Fill all required fields', 'warning');
     setAdding(true);
     try {
-      const res = await fetch('/api/workers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, earnings: Number(form.earnings) }) });
+      const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/workers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, earnings: Number(form.earnings) }) });
       const data = await res.json();
       if (data.success) {
         setWorkers(p => [data.data, ...p]);
@@ -346,7 +346,7 @@ function Claims({ showToast, onFlaggedChange }) {
   const [expanded, setExpanded] = useState(null);
 
   const fetchClaims = useCallback(() => {
-    fetch('/api/claims').then(r => r.json()).then(d => {
+    fetch((import.meta.env.VITE_API_URL || '') + '/api/claims').then(r => r.json()).then(d => {
       if (d.success) {
         setClaims(d.data);
         onFlaggedChange(d.data.filter(c => c.status === 'flagged' || c.status === 'pending').length);
@@ -365,7 +365,7 @@ function Claims({ showToast, onFlaggedChange }) {
   const doApprove = async (id, amount, workerId) => {
     setPaying(id);
     try {
-      const res  = await fetch(`/api/claims/${id}/approve`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: 'Approved by admin' }) });
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/claims/${id}/approve`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: 'Approved by admin' }) });
       const data = await res.json();
       if (data.success) {
         setClaims(p => {
@@ -375,7 +375,7 @@ function Claims({ showToast, onFlaggedChange }) {
         });
         showToast(`Claim ${id} approved! ₹${amount} payout initiated`, 'success');
         // Also trigger payout
-        await fetch(`/api/payments/payout/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ workerId, amount }) }).catch(() => {});
+        await fetch(`${import.meta.env.VITE_API_URL || ''}/api/payments/payout/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ workerId, amount }) }).catch(() => {});
       } else {
         showToast(`Failed to approve: ${data.error || 'Unknown error'}`, 'warning');
       }
@@ -387,7 +387,7 @@ function Claims({ showToast, onFlaggedChange }) {
 
   const doReject = async (id) => {
     try {
-      const res  = await fetch(`/api/claims/${id}/reject`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: 'Rejected by admin' }) });
+      const res  = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/claims/${id}/reject`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: 'Rejected by admin' }) });
       const data = await res.json();
       if (data.success) {
         setClaims(p => {
@@ -484,14 +484,14 @@ function Triggers({ showToast }) {
   const [lastResult, setLastResult] = useState(null);
 
   useEffect(() => {
-    fetch('/api/triggers').then(r => r.json()).then(d => { if (d.success) setTriggers(d.data); });
+    fetch((import.meta.env.VITE_API_URL || '') + '/api/triggers').then(r => r.json()).then(d => { if (d.success) setTriggers(d.data); });
   }, []);
 
   const simulate = async (id) => {
     setSimulating(id);
     setLastResult(null);
     try {
-      const res = await fetch(`/api/triggers/${id}/simulate`, { method: 'POST' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triggers/${id}/simulate`, { method: 'POST' });
       const d = await res.json();
       if (d.success) {
         setTriggers(p => p.map(t => (t.triggerId || t.id) === id ? { ...t, ...d.data, fired: true } : t));
@@ -502,7 +502,7 @@ function Triggers({ showToast }) {
     setSimulating(null);
   };
   const reset = async (id) => {
-    const res = await fetch(`/api/triggers/${id}/reset`, { method: 'POST' });
+    const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/triggers/${id}/reset`, { method: 'POST' });
     const d = await res.json();
     if (d.success) {
       setTriggers(p => p.map(t => (t.triggerId || t.id) === id ? { ...t, ...d.data, fired: false } : t));
@@ -591,7 +591,7 @@ function Fraud({ showToast }) {
   const [result, setResult]     = useState(null);
   const [workerClaims, setWorkerClaims] = useState([]);
 
-  useEffect(() => { fetch('/api/workers').then(r => r.json()).then(d => { if (d.success) setWorkers(d.data); }); }, []);
+  useEffect(() => { fetch((import.meta.env.VITE_API_URL || '') + '/api/workers').then(r => r.json()).then(d => { if (d.success) setWorkers(d.data); }); }, []);
 
   const analyze = async (w) => {
     setSelected(w);
@@ -601,12 +601,12 @@ function Fraud({ showToast }) {
 
     try {
       // Fetch worker's claims to get real ML data
-      const claimsRes = await fetch(`/api/claims/worker/${w.workerId}`);
+      const claimsRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/claims/worker/${w.workerId}`);
       const claimsData = await claimsRes.json();
       if (claimsData.success) setWorkerClaims(claimsData.data);
 
       // Also call the analyze endpoint
-      await fetch(`/api/claims/-/analyze`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bcs: w.bcs }) }).catch(() => {});
+      await fetch(`${import.meta.env.VITE_API_URL || ''}/api/claims/-/analyze`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bcs: w.bcs }) }).catch(() => {});
     } catch {}
 
     // Build analysis from real claim data + worker profile
@@ -728,7 +728,7 @@ function Fraud({ showToast }) {
 function Payouts() {
   const [payments, setPayments] = useState([]);
   useEffect(() => {
-    fetch('/api/payments').then(r => r.json()).then(d => { if (d.success) setPayments(d.data); })
+    fetch((import.meta.env.VITE_API_URL || '') + '/api/payments').then(r => r.json()).then(d => { if (d.success) setPayments(d.data); })
       .catch(() => setPayments([]));
   }, []);
 
@@ -767,7 +767,7 @@ export default function AdminDashboard({ activePage, showToast, onFlaggedChange 
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetch('/api/admin/stats').then(r => r.json()).then(d => { if (d.success) setStats(d.data); });
+    fetch((import.meta.env.VITE_API_URL || '') + '/api/admin/stats').then(r => r.json()).then(d => { if (d.success) setStats(d.data); });
   }, []);
 
   const titles = {

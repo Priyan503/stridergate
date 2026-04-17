@@ -8,7 +8,7 @@ export default function PaymentModal({ worker, onClose, onSuccess }) {
     setStep('processing');
     try {
       // 1. Create order
-      const orderRes = await fetch('/api/payments/create-order', {
+      const orderRes = await fetch((import.meta.env.VITE_API_URL || '') + '/api/payments/create-order', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: worker.premium, workerId: worker.workerId, planName: worker.plan }),
       });
@@ -23,7 +23,7 @@ export default function PaymentModal({ worker, onClose, onSuccess }) {
         await new Promise(r => setTimeout(r, 2000));
 
         // Verify mock payment
-        await fetch('/api/payments/verify', {
+        await fetch((import.meta.env.VITE_API_URL || '') + '/api/payments/verify', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId, paymentId: `mock_pay_${Date.now()}_success`, signature: 'mock', workerId: worker.workerId }),
         });
@@ -46,7 +46,7 @@ export default function PaymentModal({ worker, onClose, onSuccess }) {
         prefill:     { name: worker.name },
         theme:       { color: '#00d4a8' },
         handler: async (response) => {
-          await fetch('/api/payments/verify', {
+          await fetch((import.meta.env.VITE_API_URL || '') + '/api/payments/verify', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               orderId:   response.razorpay_order_id,

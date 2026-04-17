@@ -28,7 +28,7 @@ export default function LoginPage({ onLogin }) {
   const [error, setError]         = useState('');
 
   useEffect(() => {
-    fetch('/api/auth/workers')
+    fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/workers')
       .then(r => r.json())
       .then(d => {
         if (d.success && d.data.length > 0) {
@@ -44,7 +44,7 @@ export default function LoginPage({ onLogin }) {
     setError('');
     try {
       const body = role === 'worker' ? { role, workerId: selWorker } : { role };
-      const res  = await fetch('/api/auth/login', {
+      const res  = await fetch((import.meta.env.VITE_API_URL || '') + '/api/auth/login', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });

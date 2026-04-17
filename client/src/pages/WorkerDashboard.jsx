@@ -42,7 +42,7 @@ function ClaimModal({ worker, onClose, onSubmit }) {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const res = await fetch('/api/claims', {
+      const res = await fetch((import.meta.env.VITE_API_URL || '') + '/api/claims', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -184,7 +184,7 @@ export default function WorkerDashboard({ worker: initialWorker, activePage, sho
 
   const fetchClaims = useCallback(() => {
     if (!worker?.workerId) return;
-    fetch(`/api/claims/worker/${worker.workerId}`)
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/claims/worker/${worker.workerId}`)
       .then(r => r.json()).then(d => { if (d.success) setClaims(d.data); }).catch(() => {});
   }, [worker?.workerId]);
 
@@ -192,12 +192,12 @@ export default function WorkerDashboard({ worker: initialWorker, activePage, sho
     if (!initialWorker?.workerId) return;
     const wid = initialWorker.workerId;
     // Fetch worker's own data
-    fetch(`/api/workers/${wid}`)
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/workers/${wid}`)
       .then(r => r.json()).then(d => { if (d.success) setWorker(d.data); }).catch(() => {});
     // Fetch claims
     fetchClaims();
     // Fetch pricing breakdown
-    fetch(`/api/workers/${wid}/pricing`)
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/workers/${wid}/pricing`)
       .then(r => r.json()).then(d => { if (d.success) setPricing(d.data.pricing?.legacy || d.data.pricing); }).catch(() => {});
   }, [initialWorker?.workerId]);
 
