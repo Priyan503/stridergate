@@ -99,10 +99,11 @@ function generateSensorData(riderId, count = 15) {
 }
 
 // ── Main Seed ─────────────────────────────────────────────────────
-async function seed() {
+export async function seedDatabase(overrideUri) {
   try {
-    await mongoose.connect(MONGO_URI);
-    console.log('  📦 Connected to MongoDB');
+    const uriToUse = overrideUri || MONGO_URI;
+    await mongoose.connect(uriToUse);
+    console.log('  📦 Connected to MongoDB (Seeding)');
 
     // Clear existing data
     await Promise.all([
@@ -140,11 +141,14 @@ async function seed() {
     console.log('  📊 Seeded activity, order, and sensor data for all workers');
 
     console.log('\n  ✅ Seed complete!\n');
-    process.exit(0);
+    return true;
   } catch (err) {
     console.error('  ❌ Seed failed:', err);
-    process.exit(1);
+    throw err;
   }
 }
 
-seed();
+import * as url from 'url';
+if (import.meta.url === url.pathToFileURL(process.argv[1]).href) {
+  seedDatabase().then(() => process.exit(0)).catch(() => process.exit(1));
+}

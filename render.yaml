@@ -1,0 +1,50 @@
+services:
+  # 1. ML Service (FastAPI)
+  - type: web
+    name: shielded-rider-ml
+    env: docker
+    dockerContext: ./ml-service
+    dockerfilePath: ./ml-service/Dockerfile
+    envVars:
+      - key: LLM_PROVIDER
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false  # You will enter this on the Render dashboard
+
+  # 2. API Server (Node + Express + In-Memory Mongo)
+  - type: web
+    name: shielded-rider-api
+    env: docker
+    dockerContext: ./server
+    dockerfilePath: ./server/Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        value: memory
+      - key: JWT_SECRET
+        generateValue: true
+      # Inherits the public URL of the ML service dynamically
+      - key: ML_SERVICE_URL
+        fromService:
+          type: web
+          name: shielded-rider-ml
+          envVarKey: RENDER_EXTERNAL_URL
+
+  # 3. Client Frontend (Vite Static Site)
+  - type: web
+    name: shielded-rider-web
+    env: static
+    buildCommand: cd client && npm install --legacy-peer-deps && npm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      # Inherits the public URL of the Node API dynamically
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: shielded-rider-api
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
