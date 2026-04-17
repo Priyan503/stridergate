@@ -11,7 +11,11 @@ const connectDB = async () => {
     if (!uri || uri === 'memory') {
       console.log('  ⚠️  No MONGO_URI provided. Booting dynamic in-memory database...');
       const { MongoMemoryServer } = await import('mongodb-memory-server');
-      mongoMemoryServer = await MongoMemoryServer.create();
+      mongoMemoryServer = await MongoMemoryServer.create({
+        binary: {
+          version: '7.0.14' // Required for Debian 12+ compatibility
+        }
+      });
       uri = mongoMemoryServer.getUri();
     }
 
