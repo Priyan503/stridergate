@@ -3,8 +3,8 @@ services:
   - type: web
     name: shielded-rider-ml
     env: docker
-    dockerContext: ./ml-service
-    dockerfilePath: ./ml-service/Dockerfile
+    dockerContext: ml-service
+    dockerfilePath: Dockerfile
     envVars:
       - key: LLM_PROVIDER
         value: openai
@@ -15,8 +15,8 @@ services:
   - type: web
     name: shielded-rider-api
     env: docker
-    dockerContext: ./server
-    dockerfilePath: ./server/Dockerfile
+    dockerContext: server
+    dockerfilePath: Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
