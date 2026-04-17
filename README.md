@@ -20,7 +20,7 @@ Instead of manual claims and delayed payouts, our system:
     
 ---
 
-## 🔐 Environment Variables & APIs
+## Environment Variables & APIs
 
 To run the application, you'll need to configure your environment variables. 
 1. **Server (`server/.env`)**:
@@ -32,7 +32,7 @@ To run the application, you'll need to configure your environment variables.
 
 ---
 
-## 🏗️ How to Run via Docker
+## How to Run via Docker
 
 The platform is fully containerized using Docker Compose. Ensure you have **Docker Desktop** installed.
 
@@ -189,7 +189,7 @@ P(disruption) ∈ [0,1]
 
 ##  Anti-Fraud & Security System
 
-### 🔹 Movement & Environmental Intelligence
+### Movement & Environmental Intelligence
 
 - Matches rider movement with real traffic and weather conditions
     
@@ -198,7 +198,7 @@ P(disruption) ∈ [0,1]
 
 ---
 
-### 🔹 Cross-User Fraud Detection
+### Cross-User Fraud Detection
 
 - Identifies suspicious clusters of users with:
     
@@ -211,7 +211,7 @@ P(disruption) ∈ [0,1]
 
 ---
 
-### 🔹 Active Movement Verification (Challenge-Response)
+### Active Movement Verification (Challenge-Response)
 
 If GPS shows no movement during disruption:
 
@@ -234,7 +234,7 @@ User is notified to check location services
 
 ---
 
-### 🔹 Transparent Anomaly Resolution
+### Transparent Anomaly Resolution
 
 Instead of silent rejection:
 
@@ -315,7 +315,7 @@ No payouts in cases of:
 
 ---
 
-## 🚀 Features Implemented
+## Features Implemented
 
 - **Automated Weather Risk Scoring:** Integrates with OpenWeather to assess real-time risk.
 - **Dynamic Payouts Simulation:** Connects mock payments using Razorpay's API.
