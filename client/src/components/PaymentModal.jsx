@@ -40,7 +40,7 @@ export default function PaymentModal({ worker, onClose, onSuccess }) {
         key:         keyId,
         amount:      worker.premium * 100,
         currency:    'INR',
-        name:        'GigShield Insurance',
+        name:        'Shielded Rider Insurance',
         description: `${worker.plan} Plan — Weekly Premium`,
         order_id:    orderId,
         prefill:     { name: worker.name },

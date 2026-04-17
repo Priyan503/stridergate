@@ -10,7 +10,7 @@ export default function App() {
   const [user, setUser]       = useState(null);
   const [activePage, setActivePage] = useState(null);
   const [toast, setToast]     = useState(null);
-  const [flagged, setFlagged] = useState(1);  // count of flagged claims for badge
+  const [flagged, setFlagged] = useState(0);
 
   // Restore session from sessionStorage
   useEffect(() => {
@@ -72,6 +72,7 @@ export default function App() {
             <AdminDashboard
               activePage={activePage}
               showToast={showToast}
+              onFlaggedChange={setFlagged}
             />
           )}
         </main>

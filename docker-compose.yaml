@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: gigshield-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  server:
+    build: 
+      context: ./server
+    container_name: gigshield-server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/shieldedrider
+      - NODE_ENV=development
+      - JWT_SECRET=shielded-rider-demo-secret-2026
+      # Set OPENWEATHER_API_KEY in server/.env natively or define here if needed:
+      - ML_SERVICE_URL=http://ml-service:8001
+    depends_on:
+      - mongodb
+    # Note: Use env_file to pass your payment/weather keys if you dont want them hardcoded over compose
+    env_file:
+      - ./server/.env
+    restart: unless-stopped
+
+  ml-service:
+    build:
+      context: ./ml-service
+    container_name: gigshield-ml-service
+    ports:
+      - "8001:8001"
+    environment:
+      - LLM_PROVIDER=openai
+      # Make sure to set your actual OpenAI API Key in ml-service/.env before starting
+    env_file:
+      - ./ml-service/.env
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+    container_name: gigshield-client
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://server:5000
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:

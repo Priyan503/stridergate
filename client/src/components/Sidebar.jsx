@@ -12,7 +12,7 @@ export default function Sidebar({ role, user, activePage, onNavigate, onLogout, 
     { id: 'workers',   icon: '👥', label: 'Workers'     },
     { id: 'claims',    icon: '📋', label: 'Claims', badge: flaggedCount || null },
     { id: 'triggers',  icon: '⚡', label: 'Triggers'    },
-    { id: 'fraud',     icon: '🔍', label: 'Fraud / BCS' },
+    { id: 'fraud',     icon: '🔍', label: 'Fraud / ML'  },
     { id: 'payouts',   icon: '💸', label: 'Payouts'     },
   ];
 
@@ -24,8 +24,8 @@ export default function Sidebar({ role, user, activePage, onNavigate, onLogout, 
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">🛡️</div>
         <div>
-          <div className="sidebar-logo-text">GigShield</div>
-          <div className="sidebar-logo-ver">v2.0 · Demo</div>
+          <div className="sidebar-logo-text">Shielded Rider</div>
+          <div className="sidebar-logo-ver">v3.0 · ML-Powered</div>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export default function Sidebar({ role, user, activePage, onNavigate, onLogout, 
           >
             <span className="sidebar-icon">{item.icon}</span>
             {item.label}
-            {item.badge && <span className="sidebar-badge">{item.badge}</span>}
+            {item.badge && <span className="sidebar-badge badge-pulse">{item.badge}</span>}
           </button>
         ))}
       </div>
