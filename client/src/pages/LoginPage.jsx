@@ -23,23 +23,25 @@ function RainBg() {
 
 export default function LoginPage({ onLogin }) {
   const [workers, setWorkers]     = useState([]);
-  const [selWorker, setSelWorker] = useState('W001');
+  const [selWorker, setSelWorker] = useState('');
   const [loading, setLoading]     = useState(null);
+  const [error, setError]         = useState('');
 
   useEffect(() => {
     fetch('/api/auth/workers')
       .then(r => r.json())
-      .then(d => { if (d.success) setWorkers(d.data); })
-      .catch(() => setWorkers([
-        { workerId: 'W001', name: 'Ravi Kumar',   platform: 'Swiggy' },
-        { workerId: 'W002', name: 'Priya Sharma', platform: 'Zomato' },
-        { workerId: 'W003', name: 'Arjun Mehta',  platform: 'Swiggy' },
-        { workerId: 'W004', name: 'Deepa Nair',   platform: 'Zomato' },
-      ]));
+      .then(d => {
+        if (d.success && d.data.length > 0) {
+          setWorkers(d.data);
+          setSelWorker(d.data[0].workerId);
+        }
+      })
+      .catch(() => setError('Could not connect to server'));
   }, []);
 
   const doLogin = async (role) => {
     setLoading(role);
+    setError('');
     try {
       const body = role === 'worker' ? { role, workerId: selWorker } : { role };
       const res  = await fetch('/api/auth/login', {
@@ -52,13 +54,11 @@ export default function LoginPage({ onLogin }) {
         sessionStorage.setItem('gs_role',  data.role);
         sessionStorage.setItem('gs_user',  JSON.stringify(data.user));
         onLogin(data.role, data.user);
+      } else {
+        setError(data.error || 'Login failed');
       }
     } catch {
-      // fallback direct login
-      const user = role === 'worker'
-        ? workers.find(w => w.workerId === selWorker) || workers[0]
-        : { name: 'GigShield Admin' };
-      onLogin(role, user);
+      setError('Could not connect to server. Make sure the backend is running.');
     }
     setLoading(null);
   };
@@ -69,31 +69,38 @@ export default function LoginPage({ onLogin }) {
       <div className="login-box">
         <div className="login-header">
           <div className="login-logo float">🛡️</div>
-          <h1 className="login-title serif">GigShield</h1>
-          <p className="login-subtitle">Parametric Income Insurance for Swiggy & Zomato Riders</p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-            {['OpenWeatherMap', 'Leaflet Maps', 'Razorpay (Test)', 'Anti-Spoofing BCS'].map(t => (
-              <span key={t} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,212,168,0.08)', border: '1px solid rgba(0,212,168,0.2)', color: 'var(--accent)' }}>{t}</span>
+          <h1 className="login-title serif">Shielded Rider</h1>
+          <p className="login-subtitle">AI-Powered Parametric Income Insurance for Gig Workers</p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
+            {['ML Risk Engine', 'XGBoost + LightGBM', 'Anti-Spoofing AI', 'Auto Payouts'].map(t => (
+              <span key={t} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 20, background: 'var(--accent-dim)', border: '1px solid rgba(230,161,15,0.25)', color: 'var(--accent)' }}>{t}</span>
             ))}
           </div>
         </div>
+
+        {error && (
+          <div className="alert alert-danger" style={{ marginBottom: 20 }}>
+            <span>⚠️</span><span>{error}</span>
+          </div>
+        )}
 
         <div className="login-cards">
           {/* Worker Card */}
           <div className="login-card">
             <div className="login-card-icon">🏍️</div>
             <div className="login-card-title">I'm a Rider</div>
-            <div className="login-card-desc">View your insurance policy, track claims, check live weather for your zone, and pay your weekly premium.</div>
+            <div className="login-card-desc">View your insurance policy, track claims, check live weather, and pay your weekly premium.</div>
             <ul className="login-card-features">
               <li>My policy & coverage details</li>
-              <li>My claim history & status</li>
+              <li>My claim history & ML scores</li>
               <li>Live weather for my zone</li>
-              <li>ISS score & BCS trust rating</li>
+              <li>Trust score & risk profile</li>
               <li>Pay premium via Razorpay</li>
             </ul>
             <div className="form-group" style={{ marginBottom: 12 }}>
               <label className="form-label">Select Your Profile</label>
               <select className="worker-select" value={selWorker} onChange={e => setSelWorker(e.target.value)}>
+                {workers.length === 0 && <option>Loading riders...</option>}
                 {workers.map(w => (
                   <option key={w.workerId} value={w.workerId}>
                     {w.name} — {w.platform} ({w.workerId})
@@ -101,7 +108,7 @@ export default function LoginPage({ onLogin }) {
                 ))}
               </select>
             </div>
-            <button className="btn btn-primary btn-full" onClick={() => doLogin('worker')} disabled={loading === 'worker'}>
+            <button className="btn btn-primary btn-full" onClick={() => doLogin('worker')} disabled={loading === 'worker' || workers.length === 0}>
               {loading === 'worker' ? <><span className="spinner" /> Logging in...</> : '🏍️ Enter as Rider'}
             </button>
           </div>
@@ -110,23 +117,23 @@ export default function LoginPage({ onLogin }) {
           <div className="login-card admin-card">
             <div className="login-card-icon">🏢</div>
             <div className="login-card-title">I'm an Admin</div>
-            <div className="login-card-desc">Full insurer control panel — verify workers, approve claims, trigger payouts, monitor fraud, and analyze risk.</div>
+            <div className="login-card-desc">Full insurer control panel — manage riders, approve claims, configure triggers, run ML analysis.</div>
             <ul className="login-card-features" style={{ '--accent': 'var(--blue)' }}>
-              <li>All workers — verify & manage</li>
-              <li>All claims — approve, reject & pay</li>
-              <li>Parametric trigger engine</li>
-              <li>Fraud & anti-spoofing analysis</li>
+              <li>Onboard & manage all riders</li>
+              <li>Claims — approve, reject & pay</li>
+              <li>Trigger engine — simulate disruptions</li>
+              <li>5-layer ML fraud analysis</li>
               <li>Risk forecast & payout ledger</li>
             </ul>
             <div style={{ height: 44, marginBottom: 12 }} /> {/* spacer to align buttons */}
-            <button className="btn btn-full" style={{ background: 'rgba(96,165,250,0.12)', color: 'var(--blue)', border: '1px solid rgba(96,165,250,0.3)' }} onClick={() => doLogin('admin')} disabled={loading === 'admin'}>
+            <button className="btn btn-full" style={{ background: 'var(--blue-dim)', color: 'var(--blue)', border: '1.5px solid rgba(25,120,229,0.3)' }} onClick={() => doLogin('admin')} disabled={loading === 'admin'}>
               {loading === 'admin' ? <><span className="spinner" style={{ borderTopColor: 'var(--blue)' }} /> Logging in...</> : '🏢 Enter as Admin'}
             </button>
           </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: 24, fontSize: 12, color: 'var(--muted)' }}>
-          GigShield v2.0 · All data is demo/mock · No real money transferred
+          Shielded Rider v3.0 · ML-Powered · All data is demo/mock · No real money transferred
         </div>
       </div>
     </div>

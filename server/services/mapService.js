@@ -32,7 +32,7 @@ export async function geocodeAddress(zone, city) {
     const query = encodeURIComponent(`${zone}, ${city}, India`);
     const res   = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-      { headers: { 'User-Agent': 'GigShield-InsuranceApp/1.0' }, signal: AbortSignal.timeout(4000) }
+      { headers: { 'User-Agent': 'ShieldedRider-InsuranceApp/1.0' }, signal: AbortSignal.timeout(4000) }
     );
     const data = await res.json();
     if (data.length > 0) {

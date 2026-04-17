@@ -1,27 +1,28 @@
 /**
- * Auth Controller — Simple role-based login (no passwords for demo)
+ * Auth Controller — MongoDB-backed login
  * Roles: 'worker' (sees own data only) | 'admin' (sees everything)
  */
 
 import jwt from 'jsonwebtoken';
+import Worker from '../models/Worker.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'gigshield-demo-secret-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'shielded-rider-demo-secret-2026';
 
-// Demo workers for login selection
-export const DEMO_WORKERS = [
-  { workerId: 'W001', name: 'Ravi Kumar',   platform: 'Swiggy', city: 'Bengaluru', zone: 'Koramangala' },
-  { workerId: 'W002', name: 'Priya Sharma', platform: 'Zomato', city: 'Chennai',   zone: 'Anna Nagar'   },
-  { workerId: 'W003', name: 'Arjun Mehta',  platform: 'Swiggy', city: 'Mumbai',    zone: 'Andheri East' },
-  { workerId: 'W004', name: 'Deepa Nair',   platform: 'Zomato', city: 'Hyderabad', zone: 'Banjara Hills'},
-];
-
-// GET /api/auth/workers — list demo workers for login selection
-export const getDemoWorkers = (req, res) => {
-  res.json({ success: true, data: DEMO_WORKERS });
+// GET /api/auth/workers — list workers for login selection
+export const getDemoWorkers = async (req, res) => {
+  try {
+    const workers = await Worker.find({ insurance_active: true })
+      .select('workerId name platform city zone plan premium premium_amount bcs trust_score')
+      .sort({ workerId: 1 })
+      .lean();
+    res.json({ success: true, data: workers });
+  } catch (err) {
+    res.json({ success: true, data: [] });
+  }
 };
 
 // POST /api/auth/login
-export const login = (req, res) => {
+export const login = async (req, res) => {
   const { role, workerId } = req.body;
 
   if (!role || !['worker', 'admin'].includes(role)) {
@@ -30,19 +31,24 @@ export const login = (req, res) => {
 
   if (role === 'worker') {
     if (!workerId) return res.status(400).json({ success: false, error: 'workerId required for worker login' });
-    const worker = DEMO_WORKERS.find(w => w.workerId === workerId);
-    if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' });
 
-    const token = jwt.sign({ role: 'worker', workerId, name: worker.name }, JWT_SECRET, { expiresIn: '8h' });
-    return res.json({ success: true, token, role: 'worker', user: worker });
+    try {
+      const worker = await Worker.findOne({ workerId }).lean();
+      if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' });
+
+      const token = jwt.sign({ role: 'worker', workerId, name: worker.name }, JWT_SECRET, { expiresIn: '8h' });
+      return res.json({ success: true, token, role: 'worker', user: worker });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: 'Login failed' });
+    }
   }
 
   // Admin login
   const token = jwt.sign({ role: 'admin', name: 'Admin' }, JWT_SECRET, { expiresIn: '8h' });
-  return res.json({ success: true, token, role: 'admin', user: { name: 'GigShield Admin', workerId: null } });
+  return res.json({ success: true, token, role: 'admin', user: { name: 'Shielded Rider Admin', workerId: null } });
 };
 
-// POST /api/auth/verify — check token validity
+// GET /api/auth/verify — check token validity
 export const verifyToken = (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ success: false, error: 'No token' });

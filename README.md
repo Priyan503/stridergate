@@ -1,6 +1,7 @@
 
 # 🛡️ Shielded Rider
 
+
 ### AI-Powered Monsoon Income Protection for Delivery Riders
 
 ---
@@ -17,6 +18,40 @@ Instead of manual claims and delayed payouts, our system:
     
 - Automatically compensates riders
     
+---
+
+## 🔐 Environment Variables & APIs
+
+To run the application, you'll need to configure your environment variables. 
+1. **Server (`server/.env`)**:
+   - `OPENWEATHER_API_KEY`: Get a free key from OpenWeather for live weather risk scoring.
+   - `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`: For simulating payouts (optional).
+2. **ML Service (`ml-service/.env`)**:
+   - `LLM_PROVIDER=openai`
+   - `OPENAI_API_KEY`: Your ChatGPT API Key (Required for ML reasoning).
+
+---
+
+## 🏗️ How to Run via Docker
+
+The platform is fully containerized using Docker Compose. Ensure you have **Docker Desktop** installed.
+
+1. Clone the repository and navigate to the project directory.
+2. Populate the `.env` files in `server/` and `ml-service/` as described above.
+3. Run the following command from the root directory:
+
+```bash
+docker-compose up --build
+```  
+
+4. Access the services:
+   - **Frontend App**: `http://localhost:5173`
+   - **Backend Server**: `http://localhost:5000`
+   - **ML Service**: `http://localhost:8001`
+   - **MongoDB**: Bound to port `27017`
+
+To run in the background, use `-d` flag. To stop the containers, run `docker-compose down`.
+
 
 ---
 
@@ -102,8 +137,10 @@ We don’t just detect rain — we calculate **actual income loss**.
     
 6. Payout is triggered automatically
     
+![alt text](image.png)
 
 ---
+
 
 ##  AI/ML Architecture
 
@@ -129,8 +166,7 @@ P(disruption) ∈ [0,1]
 
 ### 2. Earnings Prediction Model
 
-- Model: Random Forest
-    
+- Model: LigthGBM    
 - Predicts expected daily income
     
 - Inputs:
@@ -269,24 +305,23 @@ No payouts in cases of:
 
 | Layer    | Technology                       |
 | -------- | -------------------------------- |
-| Frontend | React.js, Tailwind CSS           |
+| Frontend | React.js, Tailwind CSS, Vite     |
 | Backend  | Node.js, Express                 |
-| Database | MongoDB, Redis                   |
-| AI/ML    | Python, Scikit-learn, XGBoost    |
-| APIs     | OpenWeather, Google Maps, OpenAQ |
+| Database | MongoDB (Dockerized)             |
+| ML Svc   | FastAPI, Scikit-learn, XGBoost   |
+| LLM      | OpenAI (ChatGPT API)             |
+| APIs     | OpenWeatherMap, OpenStreetMap    |
 | Payments | Razorpay (Test Mode)             |
 
 ---
-## API Integrations
 
-- Weather API (OpenWeather)
-- Google Maps API
-- Razorpay (test mode)
-- OpenAQ (pollution data)
+## 🚀 Features Implemented
 
----
+- **Automated Weather Risk Scoring:** Integrates with OpenWeather to assess real-time risk.
+- **Dynamic Payouts Simulation:** Connects mock payments using Razorpay's API.
+- **LLM Reasoning Layer:** Employs OpenAI's GPT models via a dedicated ML service to analyze claims and behavioral anomalies.
+- **Microservices Containerization:** The entire application (Frontend, Backend, ML Service, and MongoDB) is fully dockerized for isolated, one-click deployments.
 
-## 🏗️
 ---
 
 ##  Impact
